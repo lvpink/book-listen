@@ -1,0 +1,178 @@
+/** index.wxss **/
+
+.container { 
+  display: flex; 
+  flex-direction: column; 
+  background: #ffffff; 
+  height: 100vh; 
+  box-sizing: border-box;
+  overflow: hidden; 
+}
+
+.shelf-scroll {
+  flex: 1; 
+  width: 100%;
+}
+
+/* 顶部编辑占位 */
+.edit-placeholder {
+  width: 100%;
+  background: #ffffff;
+}
+
+.header { 
+  padding: 30rpx 40rpx 10rpx; 
+  transition: opacity 0.3s ease;
+}
+
+.list-title { 
+  font-size: 48rpx; 
+  font-weight: bold; 
+  color: #1a1a1a; 
+}
+
+/* 简洁版继续阅读区 - 增加平滑过渡 */
+.recent-section {
+  margin: 20rpx 40rpx 40rpx;
+  padding: 24rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10rpx); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.recent-label {
+  font-size: 22rpx;
+  color: #999;
+  margin-bottom: 12rpx;
+  display: block;
+}
+
+.recent-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.recent-title {
+  font-size: 30rpx;
+  color: #333;
+  font-weight: 500;
+  /* 增加长书名省略号 */
+  max-width: 70%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.recent-progress {
+  font-size: 24rpx;
+  color: #007aff;
+}
+
+/* 悬浮操作按钮组 */
+.fab-container {
+  position: fixed;
+  right: 40rpx;
+  bottom: 60rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30rpx;
+  z-index: 1000;
+  /* 贝塞尔曲线让缩回更自然 */
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.fab-container.hide {
+  transform: translate(150rpx, 150rpx) scale(0);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.fab-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 12rpx 30rpx rgba(0, 0, 0, 0.12);
+  transition: all 0.2s ease;
+}
+
+.fab-item:active {
+  transform: scale(0.9);
+  box-shadow: 0 6rpx 15rpx rgba(0, 0, 0, 0.08);
+}
+
+.fab-item.main {
+  width: 110rpx;
+  height: 110rpx;
+  background: #1a1a1a;
+  border-radius: 50%;
+  color: #ffffff;
+}
+
+.fab-item.main image {
+  width: 44rpx;
+  height: 44rpx;
+}
+
+.fab-item.main text {
+  font-size: 20rpx;
+  font-weight: 500;
+  margin-top: 2rpx;
+}
+
+.fab-item.mini {
+  width: 90rpx;
+  height: 90rpx;
+  background: #ffffff;
+  border-radius: 50%;
+  border: 1rpx solid #f0f0f0;
+}
+
+.fab-item.mini image {
+  width: 40rpx;
+  height: 40rpx;
+}
+
+/* 加载状态与空状态适配 */
+.loading-state, .empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 120rpx 40rpx;
+}
+
+/* 自定义加载动画 */
+.loading-icon {
+  width: 40rpx;
+  height: 40rpx;
+  border: 4rpx solid #f3f3f3;
+  border-top: 4rpx solid #1a1a1a;
+  border-radius: 50%;
+  margin-bottom: 20rpx;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.empty-img { width: 240rpx; height: 240rpx; margin-bottom: 30rpx; opacity: 0.6; }
+.empty-title { font-size: 32rpx; font-weight: bold; color: #333; margin-bottom: 12rpx; }
+.empty-desc { font-size: 26rpx; color: #999; margin-bottom: 40rpx; }
+
+.empty-upload-btn {
+  background: #1a1a1a; /* 改为与主色调一致 */
+  color: white;
+  width: 280rpx !important;
+  border-radius: 40rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+}

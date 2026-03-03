@@ -1,0 +1,110 @@
+/** app.wxss **/
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  /* 删除了 padding-top, 删除了居中对齐 */
+  background-color: var(--main-bg);
+}
+
+/* 全局配色与变量 */
+page {
+  --main-bg: #f7f7f7;
+  --text-main: #333333;
+  --text-sub: #888888;
+  --accent-color: #5d6572; /* 沉稳的深灰色，类似书墨色 */
+  --shelf-shadow: 0 12rpx 24rpx rgba(0,0,0,0.15);
+  background-color: var(--main-bg);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* 容器通用样式 */
+.container {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  min-height: 100vh;
+}
+
+/* 微信读书风格的书架列表 */
+.shelf-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30rpx;
+  padding: 30rpx;
+}
+
+.book-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 实物书图片效果 */
+.book-cover {
+  width: 200rpx;
+  height: 280rpx;
+  border-radius: 6rpx;
+  box-shadow: var(--shelf-shadow);
+  background: #eee;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease;
+}
+
+.book-cover:active {
+  transform: scale(0.95);
+}
+
+/* 书脊效果：让图片看起来更像实物书 */
+.book-cover::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 8rpx;
+  background: rgba(255,255,255,0.2);
+  box-shadow: 2rpx 0 5rpx rgba(0,0,0,0.1);
+}
+
+.book-title {
+  margin-top: 16rpx;
+  font-size: 24rpx;
+  color: var(--text-main);
+  text-align: center;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* 底部功能栏样式 */
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 120rpx;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  display: flex;
+  border-top: 1rpx solid #eee;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.nav-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 22rpx;
+  color: var(--text-sub);
+}
+
+.nav-btn image {
+  width: 48rpx;
+  height: 48rpx;
+  margin-bottom: 6rpx;
+}

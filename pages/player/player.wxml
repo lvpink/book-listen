@@ -1,0 +1,28 @@
+<view class="player-container">
+  <view class="glass-bg" style="background-image: url({{book.cover_url}})"></view>
+  
+  <view class="ai-theater {{showTheater ? 'active' : ''}}">
+    <view class="theater-header">
+      <text>AI 剧情演播室</text>
+      <switch checked="{{showTheater}}" bindchange="toggleTheater" />
+    </view>
+    <canvas type="2d" id="stickmanCanvas" class="theater-canvas" wx:if="{{showTheater}}"></canvas>
+    <view class="no-theater-tip" wx:else>开启 AI 演绎，看原著火柴人剧情</view>
+  </view>
+
+  <view class="book-detail" wx:if="{{!showTheater}}">
+    <image class="main-cover" src="{{book.cover_url}}"></image>
+    <text class="current-chapter">正在播放：{{currentChapterTitle}}</text>
+  </view>
+
+  <view class="controls">
+    <slider class="progress" value="{{progress}}" max="100" bindchange="seek"></slider>
+    <view class="btns">
+      <image src="/icons/prev.png" bindtap="prev"></image>
+      <view class="play-btn" bindtap="togglePlay">
+        <image src="{{isPlaying ? '/icons/pause.png' : '/icons/play.png'}}"></image>
+      </view>
+      <image src="/icons/next.png" bindtap="next"></image>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,57 @@
+<view class="manager-container {{isEditMode ? 'is-edit-active' : ''}}">
+
+  <view class="edit-header {{isEditMode ? 'show' : ''}}" style="top: {{menuBottom}}px;">
+    <view class="left-action">
+      <text class="delete-btn" wx:if="{{selectedIds.length > 0}}" bindtap="onBatchDelete">移除({{selectedIds.length}})</text>
+    </view>
+    <text class="status-title">管理书籍</text>
+    <text class="cancel-btn" bindtap="exitEditMode">取消</text>
+  </view>
+
+  <view class="shelf-grid">
+    <view class="book-item {{isEditMode ? 'jelly-animation' : ''}} {{uploadingId === item._id ? 'uploading-locked' : ''}}" wx:for="{{_books}}" wx:key="_id" bindtap="onTap" bindlongpress="onLongPress" data-item="{{item}}">
+
+      <view class="book-cover-wrap {{selectedMap[item._id] ? 'selected' : ''}}">
+        <view class="cover-status-circle" wx:if="{{!isEditMode && showProgress}}">
+          <block wx:if="{{item.progress_percent >= 100}}">
+            <text class="circle-text small">已完</text>
+          </block>
+          <block wx:elif="{{item.progress_percent > 0}}">
+            <text class="circle-text">{{item.progress_percent}}</text>
+            <text class="circle-unit">%</text>
+          </block>
+          <block wx:else>
+            <text class="circle-text small">未听</text>
+          </block>
+        </view>
+
+        <image wx:if="{{item.cover_url}}" src="{{item.cover_url}}" mode="aspectFill" class="book-cover-image"></image>
+
+        <view class="book-placeholder" wx:else style="background: linear-gradient(135deg, {{item.bgColor}}, #ffffff40); background-color: {{item.bgColor}};">
+          <image src="/icons/headSet.png" mode="aspectFit" class="placeholder-icon"></image>
+
+          <view class="placeholder-shine"></view>
+        </view>
+
+        <view class="select-badge" wx:if="{{isEditMode}}">
+          <icon type="success" size="18" color="#007aff" wx:if="{{selectedMap[item._id]}}"></icon>
+          <view class="unselected-circle" wx:else></view>
+        </view>
+
+        <view class="upload-mask" wx:if="{{uploadingId === item._id}}" catchtap="true">
+          <view class="loading-spin"></view>
+          <text class="upload-text">同步中</text>
+        </view>
+      </view>
+
+      <view class="book-info">
+        <text class="title" wx:if="{{item.is_public}}">{{item.title}}</text>
+        <view class="title private-title-wrap" wx:else>
+          <text class="base-text">{{item.title}}</text>
+          <text class="top-text">{{item.title}}</text>
+        </view>
+      </view>
+
+    </view>
+  </view>
+</view>

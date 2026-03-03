@@ -1,0 +1,218 @@
+/** warehouse.wxss **/
+
+.container { 
+  height: 100vh; 
+  display: flex; 
+  flex-direction: column; 
+  background-color: #ffffff; 
+  position: relative;
+}
+
+/* 1. 核心滚动区 */
+.library-scroll { 
+  flex: 1; 
+  width: 100%; 
+}
+
+/* 2. 顶部标题区 */
+.header { 
+  padding: 30rpx 40rpx 10rpx; 
+}
+
+.list-title { 
+  font-size: 48rpx; 
+  font-weight: bold; 
+  color: #1a1a1a; 
+  letter-spacing: 2rpx;
+}
+
+.list-subtitle {
+  font-size: 24rpx; 
+  color: #999; 
+  margin-top: 8rpx; 
+  display: block;
+}
+
+/* 3. 搜索遮罩层 (全屏显示) */
+.search-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(20px); /* 磨砂玻璃效果 */
+  z-index: 11000; /* 必须高于 FAB 和 Header */
+  transform: translateY(-100%);
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+/* 当 isSearching 为 true 时滑入 */
+.search-overlay.show { 
+  transform: translateY(0); 
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  padding: 20rpx 30rpx; /* padding-top 会在 xml 中由内联样式动态控制 */
+}
+
+/* 搜索输入框容器 */
+.search-input-wrap {
+  flex: 1;
+  height: 84rpx;
+  background: #f2f2f7;
+  border-radius: 42rpx;
+  display: flex;
+  align-items: center;
+  padding: 0 30rpx;
+}
+
+.search-input-wrap icon {
+  margin-right: 15rpx;
+}
+
+.search-input {
+  flex: 1;
+  height: 100%;
+  font-size: 30rpx;
+  color: #1a1a1a;
+}
+
+.search-cancel {
+  color: #007aff;
+  font-size: 32rpx;
+  font-weight: 500;
+  padding: 10rpx 10rpx 10rpx 20rpx;
+}
+
+/* 4. 悬浮按钮组 (Fab) */
+.fab-container {
+  position: fixed;
+  right: 40rpx;
+  bottom: 60rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 30rpx;
+  z-index: 1000;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.fab-container.hide {
+  transform: translate(150%, 150%) scale(0);
+  opacity: 0;
+}
+
+.fab-item {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 12rpx 30rpx rgba(0,0,0,0.12);
+  transition: transform 0.2s;
+  background: #ffffff;
+}
+
+.fab-item:active { 
+  transform: scale(0.9); 
+}
+
+/* 发布按钮 - 管理员专用 */
+.fab-item.admin { 
+  background: #1a1a1a; /* 统一使用深色系显得更稳重 */
+  color: #ffffff;
+}
+
+.fab-item.admin image { 
+  width: 44rpx; 
+  height: 44rpx; 
+}
+
+.fab-item.admin text {
+  font-size: 18rpx;
+  color: #ffffff;
+  font-weight: bold;
+  margin-top: 4rpx;
+}
+
+/* 搜索按钮 */
+.fab-item.search { 
+  background: #ffffff; 
+  border: 1rpx solid #eeeeee; 
+}
+
+/* 5. 空状态样式增强 */
+.empty-state {
+  padding-top: 250rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-left: 60rpx;
+  padding-right: 60rpx;
+}
+
+.empty-img { 
+  width: 240rpx; 
+  height: 240rpx; 
+  margin-bottom: 30rpx; 
+  opacity: 0.3; 
+}
+
+.empty-text { 
+  color: #999; 
+  font-size: 28rpx; 
+  text-align: center;
+  margin-bottom: 40rpx;
+}
+
+/* 管理员空状态引导按钮 */
+.empty-btn {
+  background: #1a1a1a;
+  color: #fff;
+  font-size: 28rpx;
+  border-radius: 40rpx;
+  padding: 0 60rpx;
+  height: 80rpx;
+  line-height: 80rpx;
+  box-shadow: 0 10rpx 20rpx rgba(0,0,0,0.1);
+}
+
+/* 6. 顶部细线加载条 */
+.top-loading-bar {
+  position: fixed; 
+  top: 0; left: 0; 
+  width: 0; height: 4rpx;
+  background: #007aff; 
+  z-index: 12000; 
+  transition: width 0.4s ease;
+}
+.top-loading-bar.loading { 
+  width: 100%; 
+  animation: loadingPulse 1.5s infinite;
+}
+
+@keyframes loadingPulse {
+  0% { opacity: 0.5; }
+  50% { opacity: 1; }
+  100% { opacity: 0.5; }
+}
+
+/* 7. 内容区间距微调 */
+.shelf-content {
+  padding: 0 10rpx 150rpx;
+}
+
+/* 编辑模式占位 */
+.edit-mode-spacer {
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.btn-hover {
+  background-color: #f8f8f8 !important;
+  opacity: 0.8;
+}

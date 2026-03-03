@@ -1,0 +1,64 @@
+<view class="container">
+  <view style="height: {{statusBarHeight}}px; background: #ffffff;"></view>
+
+  <scroll-view scroll-y class="shelf-scroll" scroll-top="{{scrollTop}}" scroll-with-animation>
+    
+    <view class="edit-placeholder" style="height: {{isEditMode ? '110rpx' : '0'}}; transition: all 0.3s ease;"></view>
+
+    <view class="header" wx:if="{{!isEditMode}}">
+      <text class="list-title">私人听书架</text>
+    </view>
+
+    <block wx:if="{{recentBook && !isEditMode && myBooks.length > 0}}">
+      <view class="recent-section" bindtap="onBookTap" data-item="{{recentBook}}">
+        <text class="recent-label">继续阅读</text>
+        <view class="recent-content">
+          <text class="recent-title">{{recentBook.title}}</text>
+          <text class="recent-progress">{{recentBook.progressStatus}}</text>
+        </view>
+      </view>
+    </block>
+
+    <view class="shelf-content" wx:if="{{myBooks.length > 0}}">
+      <book-manager 
+        id="bookManager" 
+        books="{{myBooks}}" 
+        isAdmin="{{isAdmin}}" 
+        menuBottom="{{menuBottom}}" 
+        uploadingId="{{uploadingId}}" 
+        bind:modechange="onModeChange" 
+        bind:itemtap="onBookTap" 
+        bind:batchdelete="handleBatchDelete" 
+        bind:booklongpress="handleBookLongPress"
+        bind:updatecover="handleUpdateCoverEvent" 
+      />
+      </view>
+
+    <view class="loading-state" wx:if="{{loading && myBooks.length === 0}}">
+      <view class="loading-icon"></view>
+      <text>正在同步书架...</text>
+    </view>
+
+    <view class="empty-state" wx:elif="{{!loading && myBooks.length === 0}}">
+      <view class="empty-holder">
+        <image class="empty-img" src="/icons/empty_shelf.png" mode="aspectFit"></image>
+        <view class="empty-title">书架空空如也</view>
+        <view class="empty-desc">在这里开启你的阅读之旅</view>
+        <button class="empty-upload-btn" bindtap="uploadBook">添加图书</button>
+      </view>
+    </view>
+
+    <view style="height: 250rpx;"></view>
+  </scroll-view>
+
+  <view class="fab-container {{isEditMode ? 'hide' : ''}}">
+    <view class="fab-item mini" bindtap="goToWarehouse" hover-class="btn-hover">
+      <image src="/icons/warehouse.png"></image>
+    </view>
+
+    <view class="fab-item main" bindtap="uploadBook" hover-class="btn-hover">
+      <image src="/icons/upload.png"></image>
+      <text>添加</text>
+    </view>
+  </view>
+</view>

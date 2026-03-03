@@ -1,0 +1,6 @@
+{
+  "usingComponents": {
+    "book-manager": "/components/book-manager/book-manager"
+  },
+  "navigationBarTitleText": "听书仓库"
+}

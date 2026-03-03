@@ -1,0 +1,185 @@
+/** book-manager.wxss **/
+
+.manager-container { position: relative; padding-top: 10rpx; }
+
+/* 1. 顶部操作栏 */
+.edit-header {
+  position: fixed; left: 0; right: 0;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(15px);
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0 40rpx; height: 0; opacity: 0;
+  z-index: 10001; transition: all 0.3s ease;
+  box-shadow: 0 2rpx 20rpx rgba(0,0,0,0.05);
+}
+.edit-header.show { height: 110rpx; opacity: 1; }
+.cancel-btn { color: #1a1a1a; font-size: 28rpx; font-weight: 500; }
+.status-title { font-weight: bold; font-size: 30rpx; }
+.delete-btn { color: #fa5151; font-size: 28rpx; font-weight: 500; }
+
+/* 2. 网格与避让 */
+.shelf-grid { display: flex; flex-wrap: wrap; padding: 20rpx 30rpx; transition: padding-top 0.3s ease;}
+.manager-container.is-edit-active .shelf-grid { padding-top: 80rpx; }
+
+.book-item { 
+  width: 33.33%; 
+  display: flex; 
+  flex-direction: column; 
+  padding: 0 12rpx; 
+  margin-bottom: 45rpx; 
+  box-sizing: border-box; 
+  position: relative; 
+  align-items: flex-start; /* 强制子项靠左对齐 */
+}
+
+/* 3. 封面包装 */
+.book-cover-wrap {
+  width: 100%; /* 宽度跟随 book-item 的 padding 后的宽度 */
+  aspect-ratio: 3 / 4; 
+  border-radius: 12rpx; 
+  position: relative;
+  box-shadow: 0 10rpx 25rpx rgba(0,0,0,0.08); 
+  background: #ffffff;
+}
+.book-cover-image { width: 100%; height: 100%; border-radius: 12rpx; display: block; position: relative; z-index: 1; }
+
+/* 4. 左上角圆形状态标签 */
+.cover-status-circle {
+  position: absolute; top: 10rpx; left: 10rpx; z-index: 100;
+  width: 62rpx; height: 62rpx; background: #ffffff; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.18);
+}
+.circle-text { color: #1a1a1a; font-size: 20rpx; font-weight: bold; }
+
+/* 5. 书名信息：宽度限制与换行逻辑 */
+.book-info { 
+  margin-top: 16rpx; 
+  width: 100%; /* 确保容器宽度与封面一致 */
+  /* 确保文字和封面对齐，不产生错位 */
+  padding: 0 4rpx;
+}
+
+.title { 
+  width: 100%; /* 限制宽度不超过封面 */
+  font-size: 24rpx; /* 稍微缩小字号以适应三列布局 */
+  line-height: 1.4; 
+  color: #1a1a1a; 
+  font-weight: 500; 
+  text-align: left; /* 居左展示 */
+  
+  /* 多行展示逻辑 */
+  display: -webkit-box; 
+  -webkit-box-orient: vertical; 
+  -webkit-line-clamp: 2; /* 最多显示两行，超过则省略 */
+  overflow: hidden; 
+  word-break: break-all; /* 确保长英文或数字也能换行 */
+  min-height: 68rpx; 
+}
+.book-cover-wrap.selected {
+  transform: scale(0.95); /* 点击选中时轻微缩小，像被按下去一样 */
+  transition: transform 0.2s ease;
+  box-shadow: 0 0 0 4rpx #007aff; /* 蓝色边框外发光 */
+}
+
+/* 私有书名流光效果 */
+.private-title-wrap { 
+  position: relative; 
+  display: block; 
+}
+
+.private-title-wrap .base-text {
+  color: #00dbde;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
+}
+
+.private-title-wrap .top-text {
+  position: absolute; top: 0; left: 0; width: 100%; color: #fc00ff;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden;
+  transform: translateZ(0);
+  animation: flash-flow 3s ease-in-out infinite;
+}
+
+@keyframes flash-flow {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 1; }
+}
+
+/* 6. 其他 UI 组件 */
+.upload-mask {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(10px);
+  z-index: 200; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 12rpx;
+}
+.loading-spin { width: 36rpx; height: 36rpx; border: 3rpx solid rgba(0,0,0,0.1); border-top: 3rpx solid #1a1a1a; border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+.select-badge { position: absolute; top: 12rpx; right: 12rpx; z-index: 180; }
+.unselected-circle { width: 36rpx; height: 36rpx; border-radius: 50%; background: rgba(255,255,255,0.9); border: 2rpx solid #e0e0e0; }
+.jelly-animation { animation: jelly 0.2s infinite ease-in-out; transform-origin: center top; }
+.book-placeholder {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  /* 去掉了 column，直接让单图标上下左右绝对居中 */
+  align-items: center;
+  justify-content: center;
+  padding: 0; /* 去掉 padding，图标居中更准确 */
+  box-sizing: border-box;
+  overflow: hidden;
+  border-radius: 12rpx;
+  /* 增加一个内阴影，让边缘有实体书的厚度感 */
+  box-shadow: inset 8rpx 0 20rpx rgba(0,0,0,0.06);
+}
+/* 新增：耳机图标样式 */
+/* 强化后的耳机图标样式 */
+.placeholder-icon {
+  width: 80rpx;  /* 既然没文字了，图标可以从 60 放大到 80，更显精致 */
+  height: 80rpx;
+  opacity: 0.8;  /* 提高一点不透明度，在浅色渐变下更好看 */
+  z-index: 2;
+  /* 核心技巧：如果图标偏暗，可以开启下面这行滤镜让它变白 */
+  /* filter: brightness(0) invert(1); */
+}
+
+.placeholder-shine {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    110deg, 
+    rgba(255,255,255,0) 20%, 
+    rgba(255,255,255,0.3) 50%, 
+    rgba(255,255,255,0) 80%
+  );
+  /* 添加循环扫过的动画 */
+  animation: shine-sweep 3s infinite linear;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes shine-sweep {
+  0% { transform: translateX(-150%) skewX(-25deg); }
+  100% { transform: translateX(150%) skewX(-25deg); }
+}
+
+/* 占位符文字样式 */
+.placeholder-title {
+  font-size: 26rpx; /* 稍微调小一点字体，适配图标 */
+  color: #ffffff;
+  text-shadow: 0 2rpx 4rpx rgba(0,0,0,0.1);
+  text-align: center;
+  font-weight: bold;
+  line-height: 1.4;
+  letter-spacing: 1rpx;
+  z-index: 2;
+  /* 限制3行书名，给图标留空间 */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3; 
+  overflow: hidden;
+  word-break: break-all;
+}

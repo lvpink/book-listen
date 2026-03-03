@@ -1,0 +1,10 @@
+{
+  "navigationBarTitleText": "我的书架",
+  "navigationStyle": "custom",
+  "backgroundColor": "#f8f9fa",
+  "enablePullDownRefresh": true,
+  "backgroundTextStyle": "dark",
+  "usingComponents": {
+    "book-manager": "/components/book-manager/book-manager"
+  }
+}

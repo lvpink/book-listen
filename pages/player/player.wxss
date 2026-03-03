@@ -1,0 +1,205 @@
+.player-container {
+  min-height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+}
+
+.bg-blur {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: -1;
+  filter: blur(50px) brightness(0.6);
+}
+
+.full-screen-mask {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  z-index: 998;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.content {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 1;
+}
+
+.header-box {
+  margin-top: 20rpx;
+}
+
+.title {
+  font-size: 38rpx;
+  font-weight: bold;
+  color: #fff;
+}
+
+.main-body-top {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 音色选择器样式修复 */
+.voice-selector-wrapper {
+  position: relative;
+  z-index: 1000;
+  margin: 40rpx 0;
+  width: 560rpx;
+}
+
+.voice-btn {
+  width: 100%;
+  height: 96rpx;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 48rpx;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+/* 展开状态：必须取消 hidden，增加高度 */
+.voice-btn.expanded {
+  height: 420rpx;
+  background: rgba(15, 25, 35, 0.98);
+  border-color: #00d2ff;
+  border-radius: 24rpx;
+  overflow: visible !important;
+}
+
+.collapsed-view {
+  width: 100%;
+  height: 96rpx;
+  display: flex;
+  align-items: center;
+  padding: 0 40rpx;
+  box-sizing: border-box;
+}
+
+.picker-inner-box {
+  width: 100%;
+  height: 420rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.inline-picker {
+  width: 100%;
+  height: 360rpx;
+}
+
+.inline-item {
+  line-height: 50px;
+  text-align: center;
+  color: #fff;
+  font-size: 34rpx;
+}
+
+.voice-btn .name {
+  flex: 1;
+  font-size: 30rpx;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.voice-btn .icon {
+  margin-right: 20rpx;
+  font-size: 32rpx;
+}
+
+.lock-icon {
+  font-size: 26rpx;
+  color: #00d2ff;
+  margin-left: auto;
+}
+
+/* 其他 UI 组件 */
+.visualizer {
+  display: flex;
+  align-items: flex-end;
+  height: 120rpx;
+  gap: 12rpx;
+  margin-bottom: 40rpx;
+}
+
+.visualizer.low-op { opacity: 0.3; }
+
+.bar {
+  width: 8rpx;
+  height: 20rpx;
+  background: #00d2ff;
+  border-radius: 4rpx;
+}
+
+.bar.animate {
+  animation: wave 0.8s infinite alternate;
+}
+
+@keyframes wave {
+  from { height: 20rpx; }
+  to { height: 80rpx; }
+}
+
+.progress-box {
+  text-align: center;
+  color: #fff;
+}
+
+.tips {
+  font-size: 24rpx;
+  opacity: 0.6;
+  margin-top: 10rpx;
+  display: block;
+}
+
+.dot-text {
+  font-size: 22rpx;
+  color: #00d2ff;
+  animation: blink 1.5s infinite;
+}
+
+@keyframes blink {
+  0% { opacity: 0.3; }
+  50% { opacity: 0.9; }
+  100% { opacity: 0.3; }
+}
+
+.controls {
+  padding-bottom: 80rpx;
+}
+
+.main-btn {
+  width: 440rpx;
+  height: 110rpx;
+  background: linear-gradient(135deg, #00d2ff, #3a7bd5);
+  border-radius: 55rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
+.main-btn.playing {
+  background: #eee;
+  color: #333;
+}
+
+.btn-icon {
+  margin-right: 15rpx;
+  font-size: 36rpx;
+}

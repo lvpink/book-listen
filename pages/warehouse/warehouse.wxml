@@ -54,8 +54,8 @@
 
   <view class="fab-container {{isEditMode ? 'hide' : ''}}">
     <view class="fab-item admin" wx:if="{{isAdmin}}" bindtap="handleBatchUploadPublic" hover-class="btn-hover">
-      <image src="/icons/upload.png"></image>
-      <text>发布</text>
+      <image src="/icons/upload_woarehousr.png"></image>
+      <!-- <text>发布</text> -->
     </view>
     
     <view class="fab-item search" bindtap="enableSearch" hover-class="btn-hover">

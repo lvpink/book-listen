@@ -123,8 +123,13 @@
 
 /* 发布按钮 - 管理员专用 */
 .fab-item.admin { 
-  background: #1a1a1a; /* 统一使用深色系显得更稳重 */
-  color: #ffffff;
+  /* background: #ede5e5; /* 统一使用深色系显得更稳重 */
+  /* color: #ffffff; */ 
+  width: 90rpx;
+  height: 90rpx;
+  background: #ffffff;
+  border-radius: 50%;
+  border: 1rpx solid #f0f0f0;
 }
 
 .fab-item.admin image { 

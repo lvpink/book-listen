@@ -52,13 +52,14 @@
   </scroll-view>
 
   <view class="fab-container {{isEditMode ? 'hide' : ''}}">
+    <view class="fab-item mini" bindtap="uploadBook" hover-class="btn-hover">
+      <image src="/icons/upload.png"></image>
+      <!-- <text>上传</text> -->
+    </view>
     <view class="fab-item mini" bindtap="goToWarehouse" hover-class="btn-hover">
       <image src="/icons/warehouse.png"></image>
+      <!-- <text>仓库</text> -->
     </view>
 
-    <view class="fab-item main" bindtap="uploadBook" hover-class="btn-hover">
-      <image src="/icons/upload.png"></image>
-      <text>添加</text>
-    </view>
   </view>
 </view>

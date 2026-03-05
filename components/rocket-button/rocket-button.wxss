@@ -1,99 +1,187 @@
+/** components/rocket-button/rocket-button.wxss **/
+
 .upload-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  display: flex; justify-content: center; align-items: center;
+  width: 90rpx; height: 90rpx; overflow: visible;
 }
 
 .upload-btn {
-  --pathA: polygon(30rpx 0rpx, 60rpx 18rpx, 42rpx 18rpx, 42rpx 36rpx, 60rpx 36rpx, 60rpx 40rpx, 30rpx 40rpx, 30rpx 40rpx, 30rpx 40rpx, 0rpx 40rpx, 0rpx 36rpx, 18rpx 36rpx, 18rpx 18rpx, 0rpx 18rpx);
-  --pathC: polygon(30rpx 0rpx, 39rpx 10rpx, 39rpx 18rpx, 39rpx 26rpx, 45rpx 32rpx, 45rpx 40rpx, 36rpx 40rpx, 30rpx 60rpx, 24rpx 40rpx, 15rpx 40rpx, 15rpx 32rpx, 21rpx 26rpx, 21rpx 18rpx, 21rpx 10rpx);
-  
-  background-color: #255ff4; /* 初始蓝色 */
+  width: 80rpx; height: 80rpx;
+  background-color: #275efe;
   border-radius: 50%;
   position: relative;
-  overflow: hidden;
-  transition: background 0.5s ease;
-  width: 140rpx;
-  height: 140rpx;
-  padding: 0;
-  border: none;
+  display: flex; align-items: center; justify-content: center;
+  /* 优化阴影：增加扩散半径，更有质感 */
+  box-shadow: 0 8rpx 24rpx 0 rgba(39, 94, 254, 0.4);
+  
+  /* 性能优化：开启硬件加速 */
+  transform: translate3d(0, 0, 0);
+  
+  /* 分离 transition：背景色快速切换，位移和透明度较慢以实现优雅归位 */
+  transition: 
+    background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.4s ease-in;
+  
+  animation: floating-btn 3.5s ease-in-out infinite;
 }
 
-/* 状态切换：芭比粉 */
-.upload-btn.upload-btn--running,
-.upload-btn.upload-btn--done {
-  background-color: #ff69b4 !important;
+/* 特效 1：云层效果优化 */
+/* 第一层：强对比色（金、珊瑚红、纯白） */
+.upload-btn::before {
+  content: "";
+  display: block;
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  border-radius: 50%;
+  z-index: 1;
+  pointer-events: none;
+  /* 颜色：金(#FFD700)、亮珊瑚橘(#FF7F50)、纯白(white) */
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M20 15 L23 30 L20 45 L17 30 Z M5 30 L20 33 L35 30 L20 27 Z' fill='%23FFD700'/%3E%3Cpath d='M50 10 L51.5 20 L50 30 L48.5 20 Z M40 20 L50 21.5 L60 20 L50 18.5 Z' fill='%23FF7F50'/%3E%3Cpath d='M85 75 L86 85 L85 95 L84 85 Z M75 85 L85 86 L95 85 L85 84 Z' fill='white'/%3E%3C/svg%3E") no-repeat center/100% 100%;
+  
+  animation: cloud-rotate 45s linear infinite, diamond-breath-opacity 3s ease-in-out infinite;
+  -webkit-animation: cloud-rotate 45s linear infinite, diamond-breath-opacity 3s ease-in-out infinite;
+  transform-origin: center center;
 }
 
-.upload-btn::before,
+/* 第二层：高明度色（电光青、幻彩粉、柠檬绿） */
 .upload-btn::after {
   content: "";
   display: block;
   position: absolute;
-  left: 50%;
-}
-
-/* 粒子层 */
-.upload-btn::before {
-  background:
-    radial-gradient(8rpx 8rpx at 48rpx 16rpx, #fff 45%, transparent 50%),
-    radial-gradient(4rpx 4rpx at 24rpx 32rpx, #fff 45%, transparent 50%),
-    radial-gradient(8rpx 8rpx at 16rpx 56rpx, #fff 45%, transparent 50%),
-    radial-gradient(4rpx 4rpx at 40rpx 52rpx, #fff 45%, transparent 50%);
-  background-repeat: no-repeat;
-  bottom: 0;
-  margin-left: -30rpx;
-  width: 60rpx;
-  height: 400rpx;
-  opacity: 0;
-  z-index: 1;
-}
-
-/* 火箭层 */
-.upload-btn::after {
-  background: linear-gradient(#fff 67%, #f4b925 67%);
-  clip-path: var(--pathA);
-  top: 40rpx;
-  margin-left: -30rpx;
-  width: 60rpx;
-  height: 60rpx;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  border-radius: 50%;
   z-index: 2;
+  pointer-events: none;
+  /* 颜色：电光青(#00FFFF)、幻彩粉(#FF69B4)、柠檬黄绿(#ADFF2F) */
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M75 15 L78 35 L75 55 L72 35 Z M55 35 L75 38 L95 35 L75 32 Z' fill='%2300FFFF'/%3E%3Cpath d='M30 65 L32 75 L30 85 L28 75 Z M20 75 L30 77 L40 75 L30 73 Z' fill='%23ADFF2F'/%3E%3Cpath d='M55 70 L56.5 80 L55 90 L53.5 80 Z M45 80 L55 81.5 L65 80 L55 78.5 Z' fill='%23FF69B4'/%3E%3C/svg%3E") no-repeat center/100% 100%;
+  
+  animation: cloud-rotate 30s linear infinite, diamond-breath-opacity 4.5s ease-in-out infinite;
+  -webkit-animation: cloud-rotate 30s linear infinite, diamond-breath-opacity 4.5s ease-in-out infinite;
+  transform-origin: center center;
+}
+/* 统一呼吸效果：只控制透明度，确保不干扰 transform 旋转 */
+@keyframes diamond-breath-opacity {
+  0%, 100% { opacity: 0.25; }
+  50% { opacity: 0.95; }
+}
+/* 反向旋转动画：让两层星星交错，看起来更璀璨 */
+@keyframes cloud-rotate-reverse {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+/* 呼吸动画：控制透明度和微调缩放 */
+@keyframes diamond-breath {
+  0%, 100% { opacity: 0.3; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1); }
 }
 
-/* 动画类 */
-.upload-btn--running::before,
-.upload-btn--done::before {
+
+/* 火箭主体 */
+.rocket-body {
+  width: 14rpx; height: 36rpx;
+  background-color: #fff;
+  position: relative;
+  border-radius: 4rpx 4rpx 0 0;
+  z-index: 10;
+  overflow: visible;
+  /* 确保火箭在容器内居中 */
+  transform: translateY(-2rpx);
+}
+/* 给按钮加一个整体的微弱呼吸效果，会让钻石星光看起来在闪烁 */
+@keyframes diamond-pulse {
+  0%, 100% { transform: scale(0.95) rotate(0deg); opacity: 0.8; }
+  50% { transform: scale(1.0) rotate(180deg); opacity: 1; }
+}
+.rocket-body::before {
+  content: ""; position: absolute;
+  top: -12rpx; left: 0;
+  border-left: 7rpx solid transparent;
+  border-right: 7rpx solid transparent;
+  border-bottom: 12rpx solid #fff;
+}
+
+.wing {
+  position: absolute; bottom: 0;
+  width: 0; height: 0;
+  border-bottom: 15rpx solid #fff;
+}
+.left { left: -12rpx; border-left: 12rpx solid transparent; }
+.right { right: -12rpx; border-right: 12rpx solid transparent; }
+
+/* 特效 2：火焰效果优化 (增加喷发感) */
+.rocket-flame {
+  position: absolute;
+  bottom: -4rpx; /* 初始收缩在机身内 */
+  left: 50%;
+  transform: translateX(-50%) scaleY(0);
+  width: 10rpx;
+  height: 24rpx;
+  background: linear-gradient(to bottom, #f4b925, #ff4500); /* 增加橙色渐变 */
+  border-radius: 0 0 50% 50%;
+  opacity: 0;
+  z-index: -1;
+  transform-origin: top;
+  transition: all 0.2s;
+}
+
+/* --- 运行状态 --- */
+.upload-btn.upload-btn--running {
+  background-color: #ff69b4 !important; 
+  box-shadow: 0 10rpx 28rpx 0 rgba(255, 105, 180, 0.5) !important;
+  animation-play-state: paused;
+}
+
+.upload-btn--running .rocket-body {
+  animation: rocketFlyOut 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) forwards;
+}
+
+/* 起飞时火焰喷射动画 */
+.upload-btn--running .rocket-flame {
+  opacity: 1 !important;
+  transform: translateX(-50%) scaleY(1) !important;
+  bottom: -24rpx !important;
+  /* 增加火焰抖动感 */
+  animation: flame-flicker 0.1s infinite alternate;
+}
+
+/* --- 状态锁：解决复位闪烁 --- */
+/* 当没有 running 类时，图标恢复为 opacity 1，位置通过 transition 回归 */
+.upload-btn:not(.upload-btn--running) {
   opacity: 1;
-  animation: riseOnce 0.5s 0.3s linear, riseLoop 1s 0.8s linear infinite;
 }
 
-.upload-btn--running::after {
-  clip-path: var(--pathC);
-  animation: flyStart 1.3s ease-in-out forwards, fly 2s 1.3s ease-in-out infinite;
+/* --- 动画集 --- */
+
+@keyframes floating-btn {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12rpx); }
 }
 
-.upload-btn--done::after {
-  animation: flyEnd 0.8s linear forwards;
+/* 统一顺时针旋转动画 */
+@keyframes cloud-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
-/* 动画关键帧转换 */
-@keyframes riseOnce {
-  from { transform: translateY(0); }
-  to { transform: translateY(100rpx); }
+@-webkit-keyframes cloud-rotate {
+  from { -webkit-transform: rotate(0deg); }
+  to { -webkit-transform: rotate(360deg); }
 }
-@keyframes riseLoop {
-  from { transform: translateY(100rpx); }
-  to { transform: translateY(300rpx); }
+
+@keyframes flame-flicker {
+  from { height: 20rpx; opacity: 0.8; }
+  to { height: 26rpx; opacity: 1; }
 }
-@keyframes flyStart {
-  from { transform: translateY(0); }
-  to { transform: translateY(-8rpx); }
-}
-@keyframes fly {
-  from, to { transform: translateY(-8rpx); }
-  50% { transform: translateY(4rpx); }
-}
-@keyframes flyEnd {
-  from { transform: translateY(0); }
-  to { transform: translateY(-200rpx); }
+
+@keyframes rocketFlyOut {
+  0% { transform: translateY(0) scale(1); opacity: 1; }
+  15% { transform: translateY(12rpx) scale(1.1); } /* 略微下沉蓄力 */
+  100% { 
+    /* 配合 3s 的时长，向上位移减小一点会让视觉速度显得更慢 */
+    transform: translateY(-600rpx) scale(0.5); 
+    opacity: 0; 
+  }
 }

@@ -1,8 +1,9 @@
 <view class="upload-wrapper">
-  <button 
-    id="upload" 
-    class="upload-btn {{statusClass}}" 
-    bindtap="handleTap" 
-    disabled="{{isDisabled}}">
-  </button>
+  <view class="upload-btn {{statusClass}}" catchtap="handleTap">
+    <view class="rocket-body">
+      <view class="wing left"></view>
+      <view class="wing right"></view>
+      <view class="rocket-flame"></view>
+    </view>
+  </view>
 </view>

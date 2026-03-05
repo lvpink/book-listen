@@ -1,6 +1,7 @@
 {
   "usingComponents": {
-    "book-manager": "/components/book-manager/book-manager"
+    "book-manager": "/components/book-manager/book-manager",
+    "rocket-button": "/components/rocket-button/rocket-button"
   },
   "navigationBarTitleText": "听书仓库"
 }

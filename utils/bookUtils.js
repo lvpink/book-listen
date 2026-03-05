@@ -26,7 +26,9 @@ const sanitizeFileName = (fileName) => {
  * 1. 批量上传图书 (带查重统计报告)
  */
 export const universalUploadBook = (options) => {
-  const { userId, isPublic = false, count = 9, onStart, onSuccess, onComplete } = options;
+  // const { userId, isPublic = false, count = 9, onStart, onSuccess, onComplete } = options;
+
+  const { userId, isPublic = false, count = 9, onStart, onSuccess, onComplete, onReportConfirm } = options;
 
   wx.chooseMessageFile({
     count: count,
@@ -83,7 +85,7 @@ export const universalUploadBook = (options) => {
       }
 
       wx.hideLoading();
-      showUploadReport(stats);
+      showUploadReport(stats, onReportConfirm);
 
       if (onSuccess) onSuccess(stats.success.length);
       if (onComplete) onComplete();
@@ -97,7 +99,7 @@ export const universalUploadBook = (options) => {
 /**
  * 内部私有：展示上传统计对话框
  */
-const showUploadReport = (stats) => {
+const showUploadReport = (stats, onReportConfirm) => {
   const sCount = stats.success.length;
   const fCount = stats.failed.length;
   
@@ -115,7 +117,16 @@ const showUploadReport = (stats) => {
     title: '上传结果统计',
     content: report,
     showCancel: false,
-    confirmText: '确认'
+    confirmText: '确认',
+    success: (res) => {
+      if (res.confirm) {
+        // 只有当传入了且它是函数时才执行
+        if (onReportConfirm && typeof onReportConfirm === 'function') {
+          onReportConfirm();
+        } 
+        // 如果没传，程序会静默结束，不会报错，这正是我们想要的
+      }
+    }
   });
 };
 

@@ -6,6 +6,6 @@
   "backgroundTextStyle": "dark",
   "usingComponents": {
     "book-manager": "/components/book-manager/book-manager",
-    "rocket-upload": "/components/rocket-button/rocket-button"
+    "rocket-button": "/components/rocket-button/rocket-button"
   }
 }

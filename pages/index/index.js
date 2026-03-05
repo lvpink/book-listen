@@ -1,10 +1,8 @@
-
-
 // index.js (重构后 - 适配批量上传统计与权限隔离)
-import { 
-  universalUploadBook, 
-  universalBatchDelete, 
-  universalUploadCover 
+import {
+  universalUploadBook,
+  universalBatchDelete,
+  universalUploadCover
 } from '../../utils/bookUtils.js';
 
 Page({
@@ -14,19 +12,21 @@ Page({
     scrollTop: 0,
     myBooks: [],
     recentBook: null,
-    loading: true, 
+    loading: true,
     isEditMode: false,
     uploadingId: null,
     // 管理员识别码
-    myAdminIdentifier: 'o1O_E5FkoWifja25vrEog_u7WvCE', 
+    myAdminIdentifier: 'o1O_E5FkoWifja25vrEog_u7WvCE',
   },
 
   onLoad() {
-    const { statusBarHeight } = wx.getWindowInfo();
+    const {
+      statusBarHeight
+    } = wx.getWindowInfo();
     const menuButton = wx.getMenuButtonBoundingClientRect();
-    this.setData({ 
+    this.setData({
       statusBarHeight,
-      menuBottom: menuButton.bottom + 5 
+      menuBottom: menuButton.bottom + 5
     });
   },
 
@@ -34,7 +34,7 @@ Page({
     this.checkRecent();
     const app = getApp();
     const userId = app.globalData.userId;
-    
+
     // 身份识别：如果是管理员，在 Page Data 里记录，方便组件和逻辑判断
     this.setData({
       isAdmin: userId === this.data.myAdminIdentifier
@@ -43,10 +43,12 @@ Page({
     if (userId) {
       this.fetchMyBooks();
     } else {
-      app.userIdReadyCallback = (id) => { 
+      app.userIdReadyCallback = (id) => {
         if (id) {
-          this.setData({ isAdmin: id === this.data.myAdminIdentifier });
-          this.fetchMyBooks(); 
+          this.setData({
+            isAdmin: id === this.data.myAdminIdentifier
+          });
+          this.fetchMyBooks();
         }
       };
     }
@@ -58,18 +60,22 @@ Page({
 
   // 监听组件模式切换
   onModeChange(e) {
-    this.setData({ isEditMode: e.detail.isEditMode });
+    this.setData({
+      isEditMode: e.detail.isEditMode
+    });
   },
 
   // 监听书籍点击
   onBookTap(e) {
     const book = e.detail.item;
     if (this.data.uploadingId === book._id) return;
-    
-    wx.vibrateShort({ type: 'light' });
+
+    wx.vibrateShort({
+      type: 'light'
+    });
     wx.setStorageSync('last_read', book);
-    wx.navigateTo({ 
-      url: `/pages/player/player?id=${book._id}&title=${encodeURIComponent(book.title)}` 
+    wx.navigateTo({
+      url: `/pages/player/player?id=${book._id}&title=${encodeURIComponent(book.title)}`
     });
   },
 
@@ -90,7 +96,10 @@ Page({
 
   // 响应组件内“换封面”按钮
   handleUpdateCoverEvent(e) {
-    const { _id, title } = e.detail.item;
+    const {
+      _id,
+      title
+    } = e.detail.item;
     this.doUploadCover(_id, title);
   },
 
@@ -136,9 +145,13 @@ Page({
       userId: getApp().globalData.userId,
       isAdmin: this.data.isAdmin,
       isPublic: targetBook.is_public || false,
-      onStart: (id) => this.setData({ uploadingId: id }),
+      onStart: (id) => this.setData({
+        uploadingId: id
+      }),
       onSuccess: () => this.fetchMyBooks(),
-      onComplete: () => this.setData({ uploadingId: null })
+      onComplete: () => this.setData({
+        uploadingId: null
+      })
     });
   },
 
@@ -148,22 +161,52 @@ Page({
    */
   uploadBook() {
     const uid = getApp().globalData.userId;
-    if (!uid) return wx.showToast({ title: '请先登录', icon: 'none' });
+    if (!uid) return wx.showToast({
+      title: '请先登录',
+      icon: 'none'
+    });
+
+    // 获取组件实例，方便后续多次调用
+    const rocketBtn = this.selectComponent('#uploader');
 
     universalUploadBook({
       userId: uid,
-      isPublic: false, // 私人上传
-      count: 5,        // 限制用户一次传5本
+      isPublic: false,
+      count: 5,
       onStart: () => {
-        this.setData({ loading: true });
+        // --- 关键修正：确保只要点火了，特效就必须触发 ---
+        if (rocketBtn) {
+          console.log("火箭点火起飞");
+          rocketBtn.launch();
+        }
+        // 不要让 fetchMyBooks 的 loading 影响这里
+        this.setData({
+          isUploading: true 
+        });
+      },
+      onReportConfirm: () => {
+        if (rocketBtn) {
+          console.log("用户确认报告，火箭复位");
+          rocketBtn.reset();
+        }
       },
       onSuccess: (successCount) => {
         if (successCount > 0) {
           this.fetchMyBooks();
         }
       },
+      onFail: (err) => {
+        // 失败也要记得重置，否则图标一直消失
+        if (rocketBtn) rocketBtn.reset();
+        wx.showToast({
+          title: '上传失败',
+          icon: 'none'
+        });
+      },
       onComplete: () => {
-        this.setData({ loading: false });
+        this.setData({
+          loading: false
+        });
       }
     });
   },
@@ -173,23 +216,32 @@ Page({
    */
   fetchMyBooks() {
     const userId = getApp().globalData.userId;
-    this.setData({ loading: true });
+    this.setData({
+      loading: true
+    });
 
     wx.request({
       url: 'https://rf3pmm2lnj.sealosbja.site/get-my-shelf',
-      header: { 'x-user-id': userId },
+      header: {
+        'x-user-id': userId
+      },
       success: (res) => {
         const books = res.data.data || [];
-        this.setData({ 
+        this.setData({
           myBooks: books,
-          loading: false 
+          loading: false
         }, () => {
           this.validateRecentBook(books);
         });
       },
       fail: () => {
-        this.setData({ loading: false });
-        wx.showToast({ title: '加载失败', icon: 'none' });
+        this.setData({
+          loading: false
+        });
+        wx.showToast({
+          title: '加载失败',
+          icon: 'none'
+        });
       }
     });
   },
@@ -203,7 +255,12 @@ Page({
     if (last) {
       const currentPos = wx.getStorageSync('pos_' + last._id) || 0;
       let progressText = currentPos > 0 ? `已读 ${Math.floor(currentPos / 1024)} KB` : '尚未开始';
-      this.setData({ recentBook: { ...last, progressStatus: progressText } });
+      this.setData({
+        recentBook: {
+          ...last,
+          progressStatus: progressText
+        }
+      });
     }
   },
 
@@ -212,11 +269,15 @@ Page({
     if (!lastRead) return;
     if (!currentBooks.some(b => b._id === lastRead._id)) {
       wx.removeStorageSync('last_read');
-      this.setData({ recentBook: null });
+      this.setData({
+        recentBook: null
+      });
     }
   },
 
   goToWarehouse() {
-    wx.navigateTo({ url: '/pages/warehouse/warehouse' });
+    wx.navigateTo({
+      url: '/pages/warehouse/warehouse'
+    });
   }
 });

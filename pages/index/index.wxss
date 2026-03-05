@@ -9,9 +9,25 @@
   overflow: hidden; 
 }
 
+/* 核心优化：固定标题栏样式 */
+.fixed-header {
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 100; /* 确保层级高于滚动内容 */
+  background: #ffffff;
+  padding: 0 40rpx;
+  display: flex;
+  align-items: center;
+  /* 增加轻微的下阴影，在滚动时可以更清晰地界定边界 */
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.02);
+  transition: all 0.3s ease;
+}
+
 .shelf-scroll {
   flex: 1; 
   width: 100%;
+  height: 100vh; /* 确保 scroll-view 撑满屏幕 */
 }
 
 /* 顶部编辑占位 */
@@ -20,8 +36,8 @@
   background: #ffffff;
 }
 
+/* 原有的 header 样式调整：仅用于 fixed-header 内的文本控制 */
 .header { 
-  padding: 30rpx 40rpx 10rpx; 
   transition: opacity 0.3s ease;
 }
 
@@ -61,7 +77,6 @@
   font-size: 30rpx;
   color: #333;
   font-weight: 500;
-  /* 增加长书名省略号 */
   max-width: 70%;
   white-space: nowrap;
   overflow: hidden;
@@ -83,7 +98,6 @@
   align-items: center;
   gap: 30rpx;
   z-index: 1000;
-  /* 贝塞尔曲线让缩回更自然 */
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
@@ -108,54 +122,28 @@
   opacity: 0.7;
 }
 
-.fab-item.main {
-  width: 110rpx;
-  height: 110rpx;
-  background: #1a1a1a;
-  border-radius: 50%;
-  color: #ffffff;
-}
-
-.fab-item.main image {
-  width: 44rpx;
-  height: 44rpx;
-}
-
-.fab-item.main text {
-  font-size: 20rpx;
-  font-weight: 500;
-  margin-top: 2rpx;
-}
-
-/* 移除背景后的点击项 */
 .fab-item.mini {
   width: 90rpx;
   height: 90rpx;
   background: transparent !important; 
   border: none !important;
-  /* 必须添加这一行，清除父类定义的 box-shadow */
   box-shadow: none !important; 
-  
   display: flex;
   align-items: center;
   justify-content: center;
-  
-  /* 使用 filter 代替 box-shadow，阴影会顺着图标轮廓走，而不是方框 */
   filter: drop-shadow(0 8rpx 15rpx rgba(0, 0, 0, 0.2));
   animation: floating 3.5s ease-in-out infinite;
   transition: all 0.2s ease;
 }
-/* 增强点击时的反馈 */
+
 .fab-item.mini:active {
   animation-play-state: paused;
   transform: scale(0.85);
-  box-shadow: none !important; /* 再次确保点击时无投影 */
   filter: drop-shadow(0 2rpx 5rpx rgba(0, 0, 0, 0.1));
 }
 
-/* 放大图标弥补失去背景后的视觉空旷感 */
 .fab-item.mini image {
-  width: 75rpx;  /* 建议调至 70rpx，视觉重心会更稳 */
+  width: 75rpx;
   height: 75rpx;
 }
 
@@ -173,7 +161,6 @@
   padding: 120rpx 40rpx;
 }
 
-/* 自定义加载动画 */
 .loading-icon {
   width: 40rpx;
   height: 40rpx;
@@ -194,10 +181,22 @@
 .empty-desc { font-size: 26rpx; color: #999; margin-bottom: 40rpx; }
 
 .empty-upload-btn {
-  background: #1a1a1a; /* 改为与主色调一致 */
+  background: #1a1a1a;
   color: white;
   width: 280rpx !important;
   border-radius: 40rpx;
   font-size: 28rpx;
   font-weight: 500;
+}
+
+/* 火箭按钮组件适配优化 */
+.upload-wrapper {
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  overflow: visible;
+}
+
+#uploader {
+  transform: scale(0.95); /* 微调尺寸，使其与仓库按钮视觉对齐 */
 }

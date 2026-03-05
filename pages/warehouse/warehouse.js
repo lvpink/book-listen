@@ -95,14 +95,40 @@ Page({
   handleBatchUploadPublic() {
     if (!this.data.isAdmin) return;
     const uid = getApp().globalData.userId;
-    
+    // 获取组件实例，方便后续多次调用
+    const rocketBtn = this.selectComponent('#uploader');
     universalUploadBook({
       userId: uid,
       isPublic: true, 
-      count: 9,      
-      onStart: () => this.setData({ loading: true }),
+      count: 9, 
+      onStart: () => {
+        // --- 关键修正：确保只要点火了，特效就必须触发 ---
+        if (rocketBtn) {
+          console.log("火箭点火起飞");
+          rocketBtn.launch();
+        }
+        // 不要让 fetchMyBooks 的 loading 影响这里
+        this.setData({
+          isUploading: true 
+        });
+      }, 
+      onReportConfirm: () => {
+        if (rocketBtn) {
+          console.log("用户确认报告，火箭复位");
+          rocketBtn.reset();
+        }
+      },    
+      // onStart: () => this.setData({ loading: true }),
       onSuccess: (successCount) => {
         if (successCount > 0) this.fetchWarehouseBooks();
+      },
+      onFail: (err) => {
+        // 失败也要记得重置，否则图标一直消失
+        if (rocketBtn) rocketBtn.reset();
+        wx.showToast({
+          title: '上传失败',
+          icon: 'none'
+        });
       },
       onComplete: () => this.setData({ loading: false })
     });

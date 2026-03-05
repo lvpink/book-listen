@@ -147,6 +147,8 @@
   z-index: -1;
   transform-origin: top;
   transition: all 0.2s;
+  /* 增加一个复合阴影：一层亮黄，一层淡白，增加在白底上的可见度 */
+  box-shadow: 0 4rpx 8rpx rgba(244, 185, 37, 0.8), 0 0 12rpx rgba(255, 255, 255, 0.5);
 }
 
 /* --- 运行状态下的按钮底色：调浅 --- */

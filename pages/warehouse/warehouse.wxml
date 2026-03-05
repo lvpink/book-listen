@@ -53,12 +53,7 @@
   </scroll-view>
 
   <view class="fab-container {{isEditMode ? 'hide' : ''}}">
-    <!-- <view class="fab-item admin" wx:if="{{isAdmin}}" bindtap="handleBatchUploadPublic" hover-class="btn-hover">
-      <image src="/icons/upload_woarehousr.png"></image>
-       <text>发布</text>
-    </view> -->
     <rocket-button id="uploader" wx:if="{{isAdmin}}" bind:btnclick="handleBatchUploadPublic"></rocket-button>
-    
     <view class="fab-item search" bindtap="enableSearch" hover-class="btn-hover">
       <icon type="search" size="20" color="#007aff"></icon>
     </view>

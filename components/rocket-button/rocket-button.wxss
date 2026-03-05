@@ -81,14 +81,19 @@
 
 /* 火箭主体 */
 .rocket-body {
-  width: 14rpx; height: 36rpx;
-  background-color: #fff;
+  width: 14rpx; 
+  height: 36rpx;
+  background-color: #ffffff !important;
   position: relative;
   border-radius: 4rpx 4rpx 0 0;
   z-index: 10;
-  overflow: visible;
-  /* 确保火箭在容器内居中 */
-  transform: translateY(-2rpx);
+  /* 关键 1：不要用 border，改用 box-shadow 模拟边框 */
+  /* 这样不会改变盒子的物理宽度，头部定位会更准 */
+  box-shadow: inset 0 0 0 1rpx #ffffff, 0 0 0 1rpx #ffffff;
+  border: none; 
+  
+  /* 关键 2：确保初始状态强制居中，不产生偏移 */
+  transform: translate3d(0, -2rpx, 0); 
 }
 /* 给按钮加一个整体的微弱呼吸效果，会让钻石星光看起来在闪烁 */
 @keyframes diamond-pulse {
@@ -96,21 +101,38 @@
   50% { transform: scale(1.0) rotate(180deg); opacity: 1; }
 }
 .rocket-body::before {
-  content: ""; position: absolute;
-  top: -12rpx; left: 0;
+  content: ""; 
+  position: absolute;
+  /* 关键 3：因为机身现在是 14rpx 且没有外部 border 占用空间 */
+  /* 这里的 top 和 left 需要精准匹配 */
+  top: -12rpx; 
+  left: 0rpx; 
+  
+  /* 关键 4：左右边框各 7rpx，加起来正好是 14rpx，完美对齐机身宽度 */
   border-left: 7rpx solid transparent;
   border-right: 7rpx solid transparent;
-  border-bottom: 12rpx solid #fff;
+  border-bottom: 12rpx solid #ffffff !important;
+  
+  /* 在白色背景下的轮廓 */
+  /* filter: drop-shadow(0 0 1rpx #1a45d0); */
 }
 
 .wing {
   position: absolute; bottom: 0;
   width: 0; height: 0;
-  border-bottom: 15rpx solid #fff;
+  border-bottom: 15rpx solid #ffffff !important;
 }
 .left { left: -12rpx; border-left: 12rpx solid transparent; }
 .right { right: -12rpx; border-right: 12rpx solid transparent; }
-
+/* 确保粉色层在非运行状态下物理消失 [cite: 27] */
+.upload-btn:not(.upload-btn--running) .rocket-pink {
+  display: none !important;
+  opacity: 0 !important;
+}
+/* 确保背景色在非运行状态下是蓝色 [cite: 2] */
+.upload-btn:not(.upload-btn--running) {
+  background-color: #275efe !important;
+}
 /* 特效 2：火焰效果优化 (增加喷发感) */
 .rocket-flame {
   position: absolute;
@@ -127,15 +149,41 @@
   transition: all 0.2s;
 }
 
-/* --- 运行状态 --- */
+/* --- 运行状态下的按钮底色：调浅 --- */
 .upload-btn.upload-btn--running {
-  background-color: #ff69b4 !important; 
-  box-shadow: 0 10rpx 28rpx 0 rgba(255, 105, 180, 0.5) !important;
+  background-color: #ffb6c1 !important; /* 浅芭比粉，确保白火箭在上面清晰可见 */
+  box-shadow: 0 10rpx 28rpx 0 rgba(255, 182, 193, 0.5) !important;
   animation-play-state: paused;
 }
 
 .upload-btn--running .rocket-body {
   animation: rocketFlyOut 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) forwards;
+}
+/* --- 动画逻辑：精确控制变色时机 --- */
+.upload-btn--running .rocket-pink {
+  /* 3秒慢速，与起飞完全同步 */
+  animation: pinkBoundaryReveal 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) forwards;
+}
+/* 4. 遮罩逻辑：模拟“通过圆圈边缘”的过程 */
+@keyframes pinkBoundaryReveal {
+  0%, 20% { 
+    /* 蓄力及在圆圈内飞行前期：完全遮蔽粉色，露出底下的白火箭 */
+    clip-path: inset(100% 0 0 0); 
+  }
+  45% { 
+    /* 火箭穿过圆圈边缘的瞬间：从头到脚刷成深玫瑰色 */
+    clip-path: inset(0% 0 0 0); 
+  }
+  100% { 
+    clip-path: inset(0% 0 0 0); 
+  }
+}
+/* 3. 变色动画帧优化：离开图标瞬间完成 100% 变色 */
+@keyframes pinkReveal {
+  0% { clip-path: inset(100% 0 0 0); }
+  10% { clip-path: inset(100% 0 0 0); } /* 蓄力期间保持白色 [cite: 33] */
+  35% { clip-path: inset(0% 0 0 0); }   /* 飞出圆圈边缘时，已完全变成粉色 */
+  100% { clip-path: inset(0% 0 0 0); }
 }
 
 /* 起飞时火焰喷射动画 */
@@ -178,10 +226,37 @@
 
 @keyframes rocketFlyOut {
   0% { transform: translateY(0) scale(1); opacity: 1; }
-  15% { transform: translateY(12rpx) scale(1.1); } /* 略微下沉蓄力 */
-  100% { 
-    /* 配合 3s 的时长，向上位移减小一点会让视觉速度显得更慢 */
-    transform: translateY(-600rpx) scale(0.5); 
-    opacity: 0; 
-  }
+  15% { transform: translateY(12rpx) scale(1.05); } 
+  /* 终点设高一点，确保穿过所有页面元素 */
+  100% { transform: translateY(-900rpx) scale(0.8); opacity: 0; }
+}
+
+/* --- 深色穿梭层：调深 --- */
+.rocket-pink {
+  position: absolute;
+  top: -1rpx; 
+  left: -1rpx;
+  width: calc(100% + 2rpx); /* 补偿左右边框 */
+  height: calc(100% + 1rpx);
+  background-color: #d81b60; /* 深玫瑰色：在白底/书本背景上极度清晰 */
+  border-radius: 4rpx 4rpx 0 0;
+  z-index: 11;
+  /* 初始完全隐藏粉色部分 */
+  clip-path: inset(100% 0 0 0);
+  /* 增加光晕，防止在复杂背景下变虚 */
+  filter: drop-shadow(0 0 2rpx rgba(216, 27, 96, 0.4));
+}
+
+/* 头部变粉 */
+.rocket-pink::before {
+  content: ""; position: absolute;
+  top: -13rpx; left: 0;
+  border-left: 8rpx solid transparent;
+  border-right: 8rpx solid transparent;
+  border-bottom: 13rpx solid #d81b60;
+}
+
+/* 机翼变粉 */
+.rocket-pink .wing {
+  border-bottom-color: #d81b60 !important;
 }

@@ -5,6 +5,7 @@
   "enablePullDownRefresh": true,
   "backgroundTextStyle": "dark",
   "usingComponents": {
-    "book-manager": "/components/book-manager/book-manager"
+    "book-manager": "/components/book-manager/book-manager",
+    "rocket-upload": "/components/rocket-button/rocket-button"
   }
 }

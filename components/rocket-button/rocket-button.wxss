@@ -1,0 +1,99 @@
+.upload-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.upload-btn {
+  --pathA: polygon(30rpx 0rpx, 60rpx 18rpx, 42rpx 18rpx, 42rpx 36rpx, 60rpx 36rpx, 60rpx 40rpx, 30rpx 40rpx, 30rpx 40rpx, 30rpx 40rpx, 0rpx 40rpx, 0rpx 36rpx, 18rpx 36rpx, 18rpx 18rpx, 0rpx 18rpx);
+  --pathC: polygon(30rpx 0rpx, 39rpx 10rpx, 39rpx 18rpx, 39rpx 26rpx, 45rpx 32rpx, 45rpx 40rpx, 36rpx 40rpx, 30rpx 60rpx, 24rpx 40rpx, 15rpx 40rpx, 15rpx 32rpx, 21rpx 26rpx, 21rpx 18rpx, 21rpx 10rpx);
+  
+  background-color: #255ff4; /* 初始蓝色 */
+  border-radius: 50%;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.5s ease;
+  width: 140rpx;
+  height: 140rpx;
+  padding: 0;
+  border: none;
+}
+
+/* 状态切换：芭比粉 */
+.upload-btn.upload-btn--running,
+.upload-btn.upload-btn--done {
+  background-color: #ff69b4 !important;
+}
+
+.upload-btn::before,
+.upload-btn::after {
+  content: "";
+  display: block;
+  position: absolute;
+  left: 50%;
+}
+
+/* 粒子层 */
+.upload-btn::before {
+  background:
+    radial-gradient(8rpx 8rpx at 48rpx 16rpx, #fff 45%, transparent 50%),
+    radial-gradient(4rpx 4rpx at 24rpx 32rpx, #fff 45%, transparent 50%),
+    radial-gradient(8rpx 8rpx at 16rpx 56rpx, #fff 45%, transparent 50%),
+    radial-gradient(4rpx 4rpx at 40rpx 52rpx, #fff 45%, transparent 50%);
+  background-repeat: no-repeat;
+  bottom: 0;
+  margin-left: -30rpx;
+  width: 60rpx;
+  height: 400rpx;
+  opacity: 0;
+  z-index: 1;
+}
+
+/* 火箭层 */
+.upload-btn::after {
+  background: linear-gradient(#fff 67%, #f4b925 67%);
+  clip-path: var(--pathA);
+  top: 40rpx;
+  margin-left: -30rpx;
+  width: 60rpx;
+  height: 60rpx;
+  z-index: 2;
+}
+
+/* 动画类 */
+.upload-btn--running::before,
+.upload-btn--done::before {
+  opacity: 1;
+  animation: riseOnce 0.5s 0.3s linear, riseLoop 1s 0.8s linear infinite;
+}
+
+.upload-btn--running::after {
+  clip-path: var(--pathC);
+  animation: flyStart 1.3s ease-in-out forwards, fly 2s 1.3s ease-in-out infinite;
+}
+
+.upload-btn--done::after {
+  animation: flyEnd 0.8s linear forwards;
+}
+
+/* 动画关键帧转换 */
+@keyframes riseOnce {
+  from { transform: translateY(0); }
+  to { transform: translateY(100rpx); }
+}
+@keyframes riseLoop {
+  from { transform: translateY(100rpx); }
+  to { transform: translateY(300rpx); }
+}
+@keyframes flyStart {
+  from { transform: translateY(0); }
+  to { transform: translateY(-8rpx); }
+}
+@keyframes fly {
+  from, to { transform: translateY(-8rpx); }
+  50% { transform: translateY(4rpx); }
+}
+@keyframes flyEnd {
+  from { transform: translateY(0); }
+  to { transform: translateY(-200rpx); }
+}

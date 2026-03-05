@@ -103,8 +103,9 @@
 }
 
 .fab-item:active {
-  transform: scale(0.9);
+  transform: scale(0.85);
   box-shadow: 0 6rpx 15rpx rgba(0, 0, 0, 0.08);
+  opacity: 0.7;
 }
 
 .fab-item.main {
@@ -126,17 +127,41 @@
   margin-top: 2rpx;
 }
 
+/* 移除背景后的点击项 */
 .fab-item.mini {
   width: 90rpx;
   height: 90rpx;
-  background: #ffffff;
-  border-radius: 50%;
-  border: 1rpx solid #f0f0f0;
+  background: transparent !important; 
+  border: none !important;
+  /* 必须添加这一行，清除父类定义的 box-shadow */
+  box-shadow: none !important; 
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  /* 使用 filter 代替 box-shadow，阴影会顺着图标轮廓走，而不是方框 */
+  filter: drop-shadow(0 8rpx 15rpx rgba(0, 0, 0, 0.2));
+  animation: floating 3.5s ease-in-out infinite;
+  transition: all 0.2s ease;
+}
+/* 增强点击时的反馈 */
+.fab-item.mini:active {
+  animation-play-state: paused;
+  transform: scale(0.85);
+  box-shadow: none !important; /* 再次确保点击时无投影 */
+  filter: drop-shadow(0 2rpx 5rpx rgba(0, 0, 0, 0.1));
 }
 
+/* 放大图标弥补失去背景后的视觉空旷感 */
 .fab-item.mini image {
-  width: 40rpx;
-  height: 40rpx;
+  width: 75rpx;  /* 建议调至 70rpx，视觉重心会更稳 */
+  height: 75rpx;
+}
+
+@keyframes floating {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12rpx); }
 }
 
 /* 加载状态与空状态适配 */

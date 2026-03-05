@@ -1,0 +1,8 @@
+<view class="upload-wrapper">
+  <button 
+    id="upload" 
+    class="upload-btn {{statusClass}}" 
+    bindtap="handleTap" 
+    disabled="{{isDisabled}}">
+  </button>
+</view>

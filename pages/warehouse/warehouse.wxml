@@ -1,44 +1,19 @@
 <view class="container">
-  <view class="search-overlay {{isSearching ? 'show' : ''}}" bindtap="disableSearch">
-    <view class="search-bar" catchtap="true" style="padding-top: {{statusBarHeight}}px;">
-      <view class="search-input-wrap">
-        <icon type="search" size="16" color="#999"></icon>
-        <input class="search-input" 
-               placeholder="输入书名搜索仓库..." 
-               confirm-type="search" 
-               focus="{{isSearching}}"
-               bindinput="onSearchInput"
-               value="{{searchQuery}}"/>
-        <icon wx:if="{{searchQuery}}" type="clear" size="16" color="#ccc" bindtap="clearSearch"></icon>
-      </view>
-      <text class="search-cancel" bindtap="disableSearch">取消</text>
+  <view class="top-fixed-area">
+    <view style="height: {{statusBarHeight}}px; background: #ffffff;"></view>
+    <view class="header" wx:if="{{!isEditMode}}">
+      <text class="list-title">听书库</text>
+      <text class="list-subtitle">
+        {{searchQuery ? '搜索结果 (' + displayBooks.length + ')' : '共有 ' + allBooks.length + ' 本公共书籍'}}
+      </text>
     </view>
   </view>
-
-  <view style="height: {{statusBarHeight}}px; background: #ffffff;"></view>
 
   <scroll-view scroll-y class="library-scroll" scroll-top="{{scrollTop}}" scroll-with-animation>
     <view class="edit-mode-spacer" style="height: {{isEditMode ? '110rpx' : '0'}}; transition: all 0.3s ease;"></view>
 
-    <view class="header" wx:if="{{!isEditMode && !searchQuery}}">
-      <text class="list-title">听书库</text>
-      <text class="list-subtitle">共有 {{allBooks.length}} 本公共书籍</text>
-    </view>
-
     <view class="shelf-content">
-      <book-manager 
-        id="bookManager"
-        books="{{displayBooks}}" 
-        showProgress="{{false}}"
-        isAdmin="{{isAdmin}}" 
-        menuBottom="{{menuBottom}}"
-        uploadingId="{{uploadingId}}"
-        bind:modechange="onModeChange"
-        bind:itemtap="onBookTap"
-        bind:booklongpress="handleBookLongPress"
-        bind:updatecover="handleUpdateCoverEvent"
-        bind:batchdelete="handleBatchDelete"
-      />
+      <book-manager id="bookManager" books="{{displayBooks}}" showProgress="{{false}}" isAdmin="{{isAdmin}}" menuBottom="{{menuBottom}}" uploadingId="{{uploadingId}}" bind:modechange="onModeChange" bind:itemtap="onBookTap" bind:booklongpress="handleBookLongPress" bind:updatecover="handleUpdateCoverEvent" bind:batchdelete="handleBatchDelete" />
     </view>
 
     <view class="empty-state" wx:if="{{!loading && displayBooks.length === 0}}">
@@ -52,10 +27,18 @@
     <view style="height: 250rpx;"></view>
   </scroll-view>
 
-  <view class="fab-container {{isEditMode ? 'hide' : ''}}">
+  <view class="fab-container {{isEditMode ? 'hide' : ''}}" style="transform: translateY(-{{keyboardHeight}}px);">
     <rocket-button id="uploader" wx:if="{{isAdmin}}" bind:btnclick="handleBatchUploadPublic"></rocket-button>
-    <view class="fab-item search" bindtap="enableSearch" hover-class="btn-hover">
-      <icon type="search" size="20" color="#007aff"></icon>
+    <view class="apple-search {{isSearching ? 'active' : ''}}" bindtap="{{!isSearching ? 'enableSearch' : ''}}">
+      <view class="glass-bg"></view>
+      <view class="search-icon-wrapper">
+        <view class="custom-search-icon"></view>
+      </view>
+      <input class="apple-input" placeholder="搜索" placeholder-class="search-placeholder" focus="{{isSearching}}" bindinput="onSearchInput" value="{{searchQuery}}" adjust-position="{{false}}" bindkeyboardheightchange="onKeyboardHeightChange" confirm-type="search" />
+      <view class="apple-clear-wrapper" wx:if="{{isSearching && searchQuery}}" catchtap="clearSearch" hover-class="apple-btn-active" hover-stay-time="100">
+        <view class="apple-clear-icon"></view>
+      </view>
+      <text class="apple-cancel" wx:if="{{isSearching}}" catchtap="disableSearch" hover-class="apple-btn-active" hover-stay-time="100">取消</text>
     </view>
   </view>
 

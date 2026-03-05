@@ -22,7 +22,7 @@ Page({
     allBooks: [],      
     displayBooks: [],  
     searchQuery: '',   
-    
+    keyboardHeight: 0,
     // --- 交互状态 ---
     uploadingId: null  
   },
@@ -31,11 +31,11 @@ Page({
     const info = wx.getWindowInfo();
     const menuButton = wx.getMenuButtonBoundingClientRect();
     
-    // 初始化身份 (从 getApp 获取，如果是异步登录需在 onShow 再次校验)
+    // 初始化身份
     this.checkAdminIdentity();
 
     this.setData({
-      statusBarHeight: info.statusBarHeight,
+      statusBarHeight: info.statusBarHeight || 20,
       menuBottom: menuButton.bottom + 5,
     });
 
@@ -43,7 +43,6 @@ Page({
   },
 
   onShow() {
-    // 每次进入页面重新检查身份，防止登录态变更
     this.checkAdminIdentity();
   },
 
@@ -51,6 +50,16 @@ Page({
     const userId = getApp().globalData.userId;
     this.setData({
       isAdmin: userId === this.data.myAdminIdentifier
+    });
+  },
+
+  /**
+   * 键盘高度监听：配合 WXSS 中的 transform: translateY 实现搜索框随键盘平滑升起
+   */
+  onKeyboardHeightChange(e) {
+    const { height } = e.detail;
+    this.setData({
+      keyboardHeight: height > 0 ? height : 0
     });
   },
 
@@ -67,12 +76,12 @@ Page({
       method: 'GET',
       header: { 'x-user-id': uid || '' },
       success: (res) => {
-        console.log("res",res)
         if (res.data.ok) {
           const books = res.data.data || [];
           this.setData({ 
             allBooks: books,
-            displayBooks: books 
+            // 保持当前搜索结果或全量显示
+            displayBooks: this.data.searchQuery ? this.filterBooks(this.data.searchQuery, books) : books 
           });
         }
       },
@@ -86,79 +95,53 @@ Page({
   },
 
   // =================================================================
-  // 2. 管理员操作 (调用 bookUtils)
+  // 2. 管理员操作
   // =================================================================
 
-  /**
-   * 管理员：批量上传公共书籍
-   */
   handleBatchUploadPublic() {
     if (!this.data.isAdmin) return;
     const uid = getApp().globalData.userId;
-    // 获取组件实例，方便后续多次调用
     const rocketBtn = this.selectComponent('#uploader');
+    
     universalUploadBook({
       userId: uid,
       isPublic: true, 
       count: 9, 
       onStart: () => {
-        // --- 关键修正：确保只要点火了，特效就必须触发 ---
-        if (rocketBtn) {
-          console.log("火箭点火起飞");
-          rocketBtn.launch();
-        }
-        // 不要让 fetchMyBooks 的 loading 影响这里
-        this.setData({
-          isUploading: true 
-        });
+        if (rocketBtn) rocketBtn.launch();
+        this.setData({ isUploading: true });
       }, 
       onReportConfirm: () => {
-        if (rocketBtn) {
-          console.log("用户确认报告，火箭复位");
-          rocketBtn.reset();
-        }
+        if (rocketBtn) rocketBtn.reset();
       },    
-      // onStart: () => this.setData({ loading: true }),
       onSuccess: (successCount) => {
         if (successCount > 0) this.fetchWarehouseBooks();
       },
       onFail: (err) => {
-        // 失败也要记得重置，否则图标一直消失
         if (rocketBtn) rocketBtn.reset();
-        wx.showToast({
-          title: '上传失败',
-          icon: 'none'
-        });
+        wx.showToast({ title: '上传失败', icon: 'none' });
       },
       onComplete: () => this.setData({ loading: false })
     });
   },
 
   /**
-   * 监听组件发出的更新封面请求
+   * 清除搜索文字：点击苹果风格的那个小叉号触发
    */
-  handleUpdateCoverEvent(e) {
-    const { item } = e.detail;
-    const uid = getApp().globalData.userId;
-
-    universalUploadCover({
-      bookId: item._id,
-      bookTitle: item.title,
-      userId: uid,
-      isAdmin: this.data.isAdmin, 
-      isPublic: true, 
-      onStart: (id) => this.setData({ uploadingId: id }),
-      onSuccess: () => this.fetchWarehouseBooks(),
-      onComplete: () => this.setData({ uploadingId: null })
+  clearSearch() {
+    this.setData({ 
+      searchQuery: '',
+      displayBooks: this.data.allBooks,
+      // 保持聚焦状态，方便用户重新输入
+      isSearching: true 
     });
   },
 
   /**
-   * 监听组件发出的批量删除请求
+   * 批量删除监听
    */
   handleBatchDelete(e) {
     const { ids } = e.detail;
-    console.log("开始删除：",e)
     const uid = getApp().globalData.userId;
 
     universalBatchDelete({
@@ -174,32 +157,38 @@ Page({
   },
 
   // =================================================================
-  // 3. 搜索与交互
+  // 3. 搜索与交互逻辑
   // =================================================================
 
   onSearchInput(e) {
     const query = e.detail.value.trim().toLowerCase();
     this.setData({ searchQuery: query });
+    this.setData({ displayBooks: this.filterBooks(query, this.data.allBooks) });
+  },
 
-    if (!query) {
-      this.setData({ displayBooks: this.data.allBooks });
-      return;
-    }
-
-    const filtered = this.data.allBooks.filter(book => 
+  // 抽离出的过滤逻辑，方便多处复用
+  filterBooks(query, books) {
+    if (!query) return books;
+    return books.filter(book => 
       book.title.toLowerCase().includes(query)
     );
-    this.setData({ displayBooks: filtered });
   },
 
-  enableSearch() { this.setData({ isSearching: true }); },
-  disableSearch() { 
-    this.setData({ isSearching: false, searchQuery: '', displayBooks: this.data.allBooks }); 
+  enableSearch() { 
+    this.setData({ isSearching: true }); 
   },
 
-  /**
-   * 收藏到书架
-   */
+  disableSearch() {
+    this.setData({ 
+      isSearching: false, 
+      searchQuery: '',
+      displayBooks: this.data.allBooks,
+      keyboardHeight: 0 
+    });
+    // 收起键盘
+    wx.hideKeyboard();
+  },
+
   confirmAddToShelf(book) {
     const uid = getApp().globalData.userId;
     if (!uid) return wx.showToast({ title: '请先登录', icon: 'none' });
@@ -231,9 +220,6 @@ Page({
     this.setData({ isEditMode: e.detail.isEditMode });
   },
 
-  /**
-   * 处理书籍点击 (对接组件的 itemtap)
-   */
   onBookTap(e) {
     const { item } = e.detail;
     if (this.data.isEditMode) return; 
@@ -258,33 +244,27 @@ Page({
     });
   },
 
-  /**
-   * 处理长按 (对接组件的 booklongpress)
-   */
   handleBookLongPress(e) {
     if (!this.data.isAdmin) return;
     const { item } = e.detail;
-    const book = e.detail.item;
     const manager = this.selectComponent('#bookManager');
 
-    // 只有管理员 ID 才能看到“更新封面”选项
-      wx.showActionSheet({
-        itemList: ['更新图书封面', '开启管理模式'],
-        success: (res) => {
-          if (res.tapIndex === 0) {
-            this.doUploadCover(book._id, book.title);
-          } else if (res.tapIndex === 1) {
-            manager.enterEditModeExternally(item._id);
-          }
+    wx.showActionSheet({
+      itemList: ['更新图书封面', '开启管理模式'],
+      success: (res) => {
+        if (res.tapIndex === 0) {
+          this.doUploadCover(item._id, item.title);
+        } else if (res.tapIndex === 1) {
+          if (manager) manager.enterEditModeExternally(item._id);
         }
-      });
+      }
+    });
   },
+
   /**
-   * 更新封面逻辑
-   * 仅限管理员操作，会自动识别是更新公共书还是私有书
+   * 统一封面上传逻辑
    */
   doUploadCover(bookId, bookTitle) {
-    // 找到该书，确认其 public 属性
     const targetBook = this.data.allBooks.find(b => b._id === bookId);
     if (!targetBook) return;
 
@@ -293,17 +273,10 @@ Page({
       bookTitle: bookTitle,
       userId: getApp().globalData.userId,
       isAdmin: this.data.isAdmin,
-      isPublic: targetBook.is_public || false,
+      isPublic: true, // 听书库默认为公共书籍
       onStart: (id) => this.setData({ uploadingId: id }),
       onSuccess: () => this.fetchWarehouseBooks(),
       onComplete: () => this.setData({ uploadingId: null })
     });
   }
-  // handleBookLongPress(e) {
-  //   if (!this.data.isAdmin) return;
-  //   const { item } = e.detail;
-  //   const manager = this.selectComponent('#bookManager');
-  //   // 如果是管理员，直接进入针对该书的选择管理模式
-  //   if (manager) manager.enterEditModeExternally(item._id);
-  // }
 });

@@ -1,223 +1,200 @@
 /** warehouse.wxss **/
 
+/* 1. 基础容器：改用 Flex 垂直布局 */
 .container { 
   height: 100vh; 
   display: flex; 
   flex-direction: column; 
   background-color: #ffffff; 
-  position: relative;
+  overflow: hidden; /* 防止容器本身滚动 */
 }
 
-/* 1. 核心滚动区 */
-.library-scroll { 
-  flex: 1; 
-  width: 100%; 
+/* 顶部固定区域：不再随页面滚动 */
+.top-fixed-area {
+  flex-shrink: 0;
+  background: #ffffff;
+  z-index: 1100;
 }
 
-/* 2. 顶部标题区 */
+/* 优化标题栏间距 */
 .header { 
-  padding: 30rpx 40rpx 10rpx; 
+  padding: 20rpx 40rpx 12rpx; /* 缩小了上下内边距：原本是 30/20 */
+  background: rgba(255, 255, 255, 0.95); 
+  border-bottom: 1rpx solid rgba(0, 0, 0, 0.05); 
 }
-
 .list-title { 
-  font-size: 48rpx; 
+  font-size: 44rpx; /* 略微调小字体，更显精致 */
   font-weight: bold; 
   color: #1a1a1a; 
-  letter-spacing: 2rpx;
+  letter-spacing: 1rpx;
+  line-height: 1.2; /* 紧凑行高 */
 }
-
 .list-subtitle {
-  font-size: 24rpx; 
+  font-size: 22rpx; 
   color: #999; 
-  margin-top: 8rpx; 
+  margin-top: 4rpx; /* 缩小标题与统计文字的间距 */
   display: block;
 }
 
-/* 3. 搜索遮罩层 (全屏显示) */
-.search-overlay {
+/* 核心滚动区：填充剩余空间 */
+.library-scroll { 
+  flex: 1; 
+  height: 0; /* 关键：强制触发 Flex 伸展 */
+  width: 100%; 
+}
+
+/* --- 2. 仿 App Store 搜索框 (优化版) --- */
+.fab-container {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(255, 255, 255, 0.98);
-  backdrop-filter: blur(20px); /* 磨砂玻璃效果 */
-  z-index: 11000; /* 必须高于 FAB 和 Header */
-  transform: translateY(-100%);
-  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  right: 30rpx;
+  bottom: 50rpx;
   display: flex;
   flex-direction: column;
+  align-items: flex-end;
+  gap: 24rpx;
+  z-index: 1000;
+  width: calc(100% - 60rpx);
+  pointer-events: none;
+  transition: transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
-/* 当 isSearching 为 true 时滑入 */
-.search-overlay.show { 
-  transform: translateY(0); 
+.fab-container > view,
+.fab-container > rocket-button {
+  pointer-events: auto;
 }
 
-.search-bar {
+.apple-search {
   display: flex;
   align-items: center;
-  gap: 20rpx;
-  padding: 20rpx 30rpx; /* padding-top 会在 xml 中由内联样式动态控制 */
+  height: 90rpx;
+  width: 90rpx; 
+  border-radius: 45rpx;
+  position: relative;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  box-shadow: 0 8rpx 32rpx rgba(0,0,0,0.1);
+  background: rgba(255, 255, 255, 0.95);
 }
 
-/* 搜索输入框容器 */
-.search-input-wrap {
-  flex: 1;
-  height: 84rpx;
-  background: #f2f2f7;
-  border-radius: 42rpx;
+.apple-search.active {
+  width: 100%; 
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.search-icon-wrapper {
+  width: 90rpx;
+  height: 90rpx;
   display: flex;
   align-items: center;
-  padding: 0 30rpx;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
-.search-input-wrap icon {
-  margin-right: 15rpx;
+/* 彻底修复：纯 CSS 绘制放大镜 (不再使用 background-color 填充圆圈) */
+.custom-search-icon {
+  width: 22rpx;
+  height: 22rpx;
+  border: 4rpx solid #666; /* 放大镜圆环 */
+  border-radius: 50%;
+  position: relative;
+  transition: all 0.3s ease;
+  transform: rotate(-45deg);
+  background: transparent; /* 确保中间不被填充颜色 */
 }
 
-.search-input {
+.custom-search-icon::after {
+  content: '';
+  position: absolute;
+  top: 22rpx;
+  left: 9rpx;
+  width: 4rpx;
+  height: 12rpx;
+  background-color: #666; /* 放大镜手柄 */
+  border-radius: 2rpx;
+}
+
+/* 激活状态：圆环和手柄同步变蓝 */
+.apple-search.active .custom-search-icon {
+  border-color: #007aff; 
+}
+.apple-search.active .custom-search-icon::after {
+  background-color: #007aff;
+}
+
+.apple-input {
   flex: 1;
   height: 100%;
-  font-size: 30rpx;
-  color: #1a1a1a;
+  padding: 0 10rpx;
+  font-size: 32rpx;
+  color: #000;
+  opacity: 0;
+  transition: opacity 0.2s;
 }
 
-.search-cancel {
+.apple-search.active .apple-input {
+  opacity: 1;
+}
+
+/* --- 3. 清除与取消按钮 --- */
+.apple-clear-icon {
+  width: 32rpx;
+  height: 32rpx;
+  background-color: #8e8e93;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 使用转义后的 SVG 确保手机正常显示 */
+.apple-clear-icon::before {
+  content: '';
+  width: 100%;
+  height: 100%;
+  background-color: #ffffff;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 12 12' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M3 3L9 9M9 3L3 9' stroke='black' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E");
+  -webkit-mask-size: 50%;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+}
+
+.apple-cancel {
+  padding: 0 30rpx;
   color: #007aff;
   font-size: 32rpx;
   font-weight: 500;
-  padding: 10rpx 10rpx 10rpx 20rpx;
+  white-space: nowrap;
+  animation: fadeIn 0.4s;
 }
 
-/* 4. 悬浮按钮组 (Fab) */
-.fab-container {
-  position: fixed;
-  right: 40rpx;
-  bottom: 60rpx;
-  display: flex;
-  flex-direction: column;
-  gap: 30rpx;
-  z-index: 1000;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+/* 缩小内容区顶部的 padding */
+.shelf-content {
+  padding: 0 10rpx 200rpx;
+  margin-top: -10rpx; /* 强制内容上移，抵消组件内边距 */
 }
 
-.fab-container.hide {
-  transform: translate(150%, 150%) scale(0);
-  opacity: 0;
-}
-
-.fab-item {
-  width: 100rpx;
-  height: 100rpx;
-  border-radius: 50%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 12rpx 30rpx rgba(0,0,0,0.12);
-  transition: transform 0.2s;
-  background: #ffffff;
-}
-
-.fab-item:active { 
-  transform: scale(0.9); 
-}
-
-/* 发布按钮 - 管理员专用 */
-.fab-item.admin { 
-  /* background: #ede5e5; /* 统一使用深色系显得更稳重 */
-  /* color: #ffffff; */ 
-  width: 90rpx;
-  height: 90rpx;
-  background: #ffffff;
-  border-radius: 50%;
-  border: 1rpx solid #f0f0f0;
-}
-
-.fab-item.admin image { 
-  width: 44rpx; 
-  height: 44rpx; 
-}
-
-.fab-item.admin text {
-  font-size: 18rpx;
-  color: #ffffff;
-  font-weight: bold;
-  margin-top: 4rpx;
-}
-
-/* 搜索按钮 */
-.fab-item.search { 
-  background: #ffffff; 
-  border: 1rpx solid #eeeeee; 
-}
-
-/* 5. 空状态样式增强 */
 .empty-state {
-  padding-top: 250rpx;
+  margin-top: 150rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-left: 60rpx;
-  padding-right: 60rpx;
 }
 
-.empty-img { 
-  width: 240rpx; 
-  height: 240rpx; 
-  margin-bottom: 30rpx; 
-  opacity: 0.3; 
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateX(20rpx); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
-.empty-text { 
-  color: #999; 
-  font-size: 28rpx; 
-  text-align: center;
-  margin-bottom: 40rpx;
-}
-
-/* 管理员空状态引导按钮 */
-.empty-btn {
-  background: #1a1a1a;
-  color: #fff;
-  font-size: 28rpx;
-  border-radius: 40rpx;
-  padding: 0 60rpx;
-  height: 80rpx;
-  line-height: 80rpx;
-  box-shadow: 0 10rpx 20rpx rgba(0,0,0,0.1);
-}
-
-/* 6. 顶部细线加载条 */
 .top-loading-bar {
   position: fixed; 
   top: 0; left: 0; 
   width: 0; height: 4rpx;
   background: #007aff; 
   z-index: 12000; 
-  transition: width 0.4s ease;
 }
 .top-loading-bar.loading { 
   width: 100%; 
-  animation: loadingPulse 1.5s infinite;
-}
-
-@keyframes loadingPulse {
-  0% { opacity: 0.5; }
-  50% { opacity: 1; }
-  100% { opacity: 0.5; }
-}
-
-/* 7. 内容区间距微调 */
-.shelf-content {
-  padding: 0 10rpx 150rpx;
-}
-
-/* 编辑模式占位 */
-.edit-mode-spacer {
-  width: 100%;
-  flex-shrink: 0;
-}
-
-.btn-hover {
-  background-color: #f8f8f8 !important;
-  opacity: 0.8;
+  transition: width 0.4s ease;
 }

@@ -1,36 +1,54 @@
 App({
-  globalData: { userId: null },
+  globalData: {
+    userId: null,
+    isAdmin: false
+  },
+
   onLaunch() {
     this.login();
   },
+
   login() {
-    return new Promise((resolve) => {
-      wx.login({
-        success: async (res) => {
-          if (res.code) {
-            // 调用上面创建的 Laf 云函数
-            wx.request({
-              url: 'https://rf3pmm2lnj.sealosbja.site/get-book-openid',
-              method: 'POST',
-              data: { code: res.code },
-              success: (loginRes) => {
-                if (loginRes.data.ok) {
-                  const openid = loginRes.data.openid;
-                  this.globalData.userId = openid;
-                  // 存一份到缓存作为备份，但逻辑上以 globalData 为准
-                  wx.setStorageSync('userId', openid);
-                  resolve(openid);
-                  
-                  // 发送一个自定义事件，通知首页 ID 拿到了
-                  if (this.userIdReadyCallback) {
-                    this.userIdReadyCallback(openid);
-                  }
-                }
+    wx.login({
+      success: (res) => {
+        if (res.code) {
+          // 第一步：换取 OpenID
+          wx.request({
+            url: 'https://gpge0t0fd7.sealosbja.site/get-book-openId',
+            method: 'POST',
+            data: { code: res.code },
+            success: (loginRes) => {
+              console.log("loginRes:",loginRes)
+              if (loginRes.data.ok) {
+                const openid = loginRes.data.openid;
+                wx.setStorageSync('userId', openid);
+
+                // 第二步：去 handle-user-login 登记并检查 isAdmin
+                this.registerUser(openid);
               }
-            });
-          }
+            }
+          });
         }
-      });
+      }
+    });
+  },
+
+  registerUser(openid) {
+    wx.request({
+      url: 'https://gpge0t0fd7.sealosbja.site/handle-user-login',
+      method: 'POST',
+      data: { openid: openid }, // 直接把 openid 发过去
+      success: (regRes) => {
+        if (regRes.data.code === 200) {
+          this.globalData.userId = openid;
+          this.globalData.isAdmin = regRes.data.isAdmin;
+
+          if (this.userIdReadyCallback) {
+            this.userIdReadyCallback(openid);
+          }
+          console.log('登录成功，管理员状态:', regRes.data.isAdmin);
+        }
+      }
     });
   }
 })

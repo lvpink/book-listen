@@ -33,23 +33,37 @@ Page({
   onShow() {
     this.checkRecent();
     const app = getApp();
-    const userId = app.globalData.userId;
-
-    // 身份识别：如果是管理员，在 Page Data 里记录，方便组件和逻辑判断
-    this.setData({
-      isAdmin: userId === this.data.myAdminIdentifier
-    });
-
-    if (userId) {
-      this.fetchMyBooks();
+    
+    // 权限识别修正：封装成统一的更新与触发函数
+    const updateAdminStatus = (id) => {
+      const currentId = id || app.globalData.userId;
+      const isAdmin = app.globalData.isAdmin || (currentId === this.data.myAdminIdentifier);
+      
+      this.setData({
+        isAdmin: isAdmin,
+        // 确保在尝试获取书架前，已经拿到了用户标识
+        userId: currentId 
+      });
+  
+      if (currentId) {
+        this.fetchMyBooks();
+      } else {
+        // 如果依然没 ID，关闭加载动画，避免死循环转圈
+        this.setData({ loading: false });
+      }
+    };
+  
+    if (app.globalData.userId) {
+      // 场景 A：登录已完成，直接执行
+      updateAdminStatus();
     } else {
+      // 场景 B：登录进行中，通过 app.js 的回调触发
+      // 增加一个防抖或重置，确保 loading 状态开启
+      this.setData({ loading: true });
+      
       app.userIdReadyCallback = (id) => {
-        if (id) {
-          this.setData({
-            isAdmin: id === this.data.myAdminIdentifier
-          });
-          this.fetchMyBooks();
-        }
+        console.log('收到登录回调，开始同步书架...', id);
+        updateAdminStatus(id);
       };
     }
   },
@@ -159,89 +173,73 @@ Page({
    * 上传私人图书
    * 逻辑：调用工具类，工具类会自动处理批量统计和重命名
    */
-  uploadBook() {
-    const uid = getApp().globalData.userId;
-    if (!uid) return wx.showToast({
-      title: '请先登录',
-      icon: 'none'
-    });
+/**
+   * 上传私人图书
+   */
+uploadBook() {
+  const app = getApp();
+  if (!app.globalData.userId) return wx.showToast({ title: '请登录', icon: 'none' });
 
-    // 获取组件实例，方便后续多次调用
-    const rocketBtn = this.selectComponent('#uploader');
+  const rocketBtn = this.selectComponent('#uploader');
 
-    universalUploadBook({
-      userId: uid,
-      isPublic: false,
-      count: 5,
-      onStart: () => {
-        // --- 关键修正：确保只要点火了，特效就必须触发 ---
-        if (rocketBtn) {
-          console.log("火箭点火起飞");
-          rocketBtn.launch();
-        }
-        // 不要让 fetchMyBooks 的 loading 影响这里
-        this.setData({
-          isUploading: true 
-        });
-      },
-      onReportConfirm: () => {
-        if (rocketBtn) {
-          console.log("用户确认报告，火箭复位");
-          rocketBtn.reset();
-        }
-      },
-      onSuccess: (successCount) => {
-        if (successCount > 0) {
-          this.fetchMyBooks();
-        }
-      },
-      onFail: (err) => {
-        // 失败也要记得重置，否则图标一直消失
-        if (rocketBtn) rocketBtn.reset();
-        wx.showToast({
-          title: '上传失败',
-          icon: 'none'
-        });
-      },
-      onComplete: () => {
-        this.setData({
-          loading: false
-        });
-      }
-    });
-  },
+  universalUploadBook({
+    userId: app.globalData.userId,
+    isPublic: false, // 强制私人模式
+    count: 5,        // 配合你的 20 本限制，每次传 5 本比较稳
+    onStart: () => {
+      if (rocketBtn) rocketBtn.launch();
+      this.setData({ isUploading: true });
+    },
+    onReportConfirm: () => {
+      if (rocketBtn) rocketBtn.reset();
+    },
+    onSuccess: (successCount) => {
+      if (successCount > 0) this.fetchMyBooks();
+    },
+    onFail: () => {
+      if (rocketBtn) rocketBtn.reset();
+    }
+  });
+},
 
   /**
-   * 获取书架数据
+   * 获取书架数据 (适配你最终的云函数名: get-my-shelf)
    */
   fetchMyBooks() {
-    const userId = getApp().globalData.userId;
-    this.setData({
-      loading: true
-    });
-
+    const app = getApp();
+    // 核心：如果还没拿到 openid，不执行查询，直接结束加载
+    if (!app.globalData.userId) {
+      this.setData({ loading: false });
+      return;
+    }
+  
+    this.setData({ loading: true });
+    console.log("openid:",app.globalData.userId)
     wx.request({
-      url: 'https://rf3pmm2lnj.sealosbja.site/get-my-shelf',
-      header: {
-        'x-user-id': userId
+      url: 'https://gpge0t0fd7.sealosbja.site/get-my-shelf',
+      method: 'GET',
+      data: { 
+        type: 'private',
+        openid: app.globalData.userId // 修正点：直接传 openid
       },
       success: (res) => {
+        console.log("booksRes:",res)
+        // 只要服务器响应了（无论 code 是 200 还是空数据），就关闭 loading
         const books = res.data.data || [];
+        const formattedBooks = books.map(b => ({
+          ...b,
+          title: b.book_tag,
+          cover: b.cover_url || '/assets/default_cover.png'
+        }));
+  
         this.setData({
-          myBooks: books,
-          loading: false
-        }, () => {
-          this.validateRecentBook(books);
+          myBooks: formattedBooks,
+          loading: false // 必须设为 false
         });
       },
-      fail: () => {
-        this.setData({
-          loading: false
-        });
-        wx.showToast({
-          title: '加载失败',
-          icon: 'none'
-        });
+      fail: (err) => {
+        console.error('书架同步失败', err);
+        this.setData({ loading: false }); // 失败也要关闭
       }
     });
   },
